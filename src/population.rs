@@ -41,12 +41,24 @@ impl Population {
     }
 
     pub fn coord(&self, x: usize, y: usize) -> Cell {
-        self.cells[y + self.size() * x]
+        self.cells[x * self.size() + y]
+    }
+
+    pub fn coords_from(&self, i: usize) -> (usize, usize) {
+        let size = self.size();
+        // (i % (size), i / (size))
+        (i / size, i % size)
+    }
+
+    pub fn idx(&self, i: usize) -> Cell {
+        let size = self.size();
+        let (x, y) = self.coords_from(i);
+        self.coord(x, y)
     }
 
     pub fn regenerate(&mut self, x: usize, y: usize) {
         let size = self.size();
-        self.cells[y + size * x] = Cell::Alive;
+        self.cells[x * size + y] = Cell::Alive;
     }
 
     pub fn neighbours(&self, x: usize, y: usize) -> Vec<Cell> {

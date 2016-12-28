@@ -83,11 +83,9 @@ fn render(r: &mut Renderer, population: &Population) {
     r.set_draw_color(Color::RGB(250, 250, 250));
     r.clear();
 
-    for x in 0..size {
-        for y in 0..size {
-            let cell = population.coord(x, y);
-            display_cell(r, x, y, cell);
-        }
+    for (i, cell) in population.cells().iter().enumerate() {
+        let (x, y) = population.coords_from(i);
+        display_cell(r, x, y, *cell);
     }
 
     r.present();
