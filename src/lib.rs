@@ -4,19 +4,14 @@ extern crate rand;
 #[macro_use] extern crate ndarray;
 
 
+mod grid;
 mod cell;
 mod population;
 mod world;
 
 // mod board;
-mod sdl;
+pub mod sdl;
 
-
-// use board::*;
-
-fn main() {
-    // world::sketch();
-    sdl::main();
 
     // let mut a = parse(INPUT);
     // let mut scratch = Board::zeros((N as Ix, N as Ix));
@@ -30,4 +25,3 @@ fn main() {
     // render(&a);
     // let alive = a.iter().filter(|&&x| x > 0).count();
     // println!("After {} steps there are {} cells alive", steps, alive);
-}

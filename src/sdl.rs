@@ -12,26 +12,6 @@ use population::{ glider, glider_br, glider_bl, glider_tl, glider_tr };
 use world::{ World, Population, Cell };
 
 
-fn init<'a>(size: u32)-> (Renderer<'a>, EventPump) {
-    let sdl_context = sdl2::init().unwrap();
-    let video_subsystem = sdl_context.video().unwrap();
-
-    let window = video_subsystem.window("demo", size , size)
-                                .position_centered()
-                                .opengl()
-                                .build()
-                                .unwrap();
-
-    let mut renderer = window.renderer().build().unwrap();
-    let event_pump = sdl_context.event_pump().unwrap();
-
-    renderer.set_draw_color(Color::RGB(255, 255, 255));
-    renderer.clear();
-    renderer.present();
-
-    (renderer, event_pump)
-}
-
 pub fn main() {
     let speed = 30;
     let n = 50;
@@ -74,6 +54,28 @@ pub fn main() {
         }
     }
 }
+
+
+fn init<'a>(size: u32)-> (Renderer<'a>, EventPump) {
+    let sdl_context = sdl2::init().unwrap();
+    let video_subsystem = sdl_context.video().unwrap();
+
+    let window = video_subsystem.window("Game of Life", size , size)
+                                .position_centered()
+                                .opengl()
+                                .build()
+                                .unwrap();
+
+    let mut renderer = window.renderer().build().unwrap();
+    let event_pump = sdl_context.event_pump().unwrap();
+
+    renderer.set_draw_color(Color::RGB(255, 255, 255));
+    renderer.clear();
+    renderer.present();
+
+    (renderer, event_pump)
+}
+
 
 fn render(r: &mut Renderer, population: &Population) {
     let size = population.size();
