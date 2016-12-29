@@ -2,6 +2,9 @@ use std::fmt;
 use std::str::FromStr;
 
 
+use grid::GridItem;
+
+
 #[derive(Debug, Copy, Clone, Eq)]
 pub enum Cell {
     Alive,
@@ -10,13 +13,6 @@ pub enum Cell {
 }
 
 impl Cell {
-    pub fn is_alive(&self) -> bool {
-        match *self {
-            Cell::Alive => true,
-            _ => false,
-        }
-    }
-
     pub fn is_dead(&self) -> bool {
         match *self {
             Cell::Dead(_) => true,
@@ -31,14 +27,45 @@ impl Cell {
         }
     }
 
-    pub fn rot(&self) -> Cell {
+
+
+}
+
+
+impl GridItem for Cell {
+    fn is_alive(&self) -> bool {
+        match *self {
+            Cell::Alive => true,
+            _ => false,
+        }
+    }
+
+    fn keep(&self) -> Cell {
+        *self
+    }
+
+    /// Kills a cell if it's alive.
+    fn kill(&self) -> Cell {
+        match *self {
+            Cell::Alive => Cell::Dead(0),
+            x => x,
+        }
+    }
+
+    /// Rots a cell if it's dead.
+    fn rot(&self) -> Cell {
         match *self {
             Cell::Dead(x) => Cell::Dead(x + 1),
             x => x,
         }
     }
 
+    /// Revives a cell no matter what.
+    fn revive(&self) -> Cell {
+        Cell::Alive
+    }
 }
+
 
 impl PartialEq for Cell {
     fn eq(&self, other: &Cell) -> bool {
@@ -53,8 +80,7 @@ impl fmt::Display for Cell {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             Cell::Alive => write!(f, "#"),
-            // Cell::Dead(x) => write!(f, "{}", x),
-            Cell::Dead(x) => write!(f, "_"),
+            Cell::Dead(x) => write!(f, "."),
             Cell::Unborn => write!(f, "_"),
         }
     }

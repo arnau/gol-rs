@@ -22,22 +22,22 @@ pub fn sketch() {
 /// The world of Conway.
 #[derive(Debug, Clone)]
 pub struct World {
-    population: Population,
+    grid: Population,
 }
 
 impl World {
     pub fn new(population: Population) -> Self {
         World {
-            population: population,
+            grid: population,
         }
     }
 
     pub fn glider(size: usize) -> Self {
-        let mut vec: Population = vec![false; size * size].into();
+        let mut vec = Population::empty(size);
         let offset = (1, 1);
 
         World {
-            population: glider(vec, offset),
+            grid: glider(vec, offset),
         }
     }
 
@@ -50,38 +50,38 @@ impl World {
         }
 
         World {
-            population: vec.into(),
+            grid: vec.into(),
         }
     }
 
     pub fn infinite(size: usize) -> Self {
-        let mut vec: Population = vec![false; size * size].into();
+        let mut vec = Population::empty(size);
 
-        vec.regenerate(1, 1);
-        vec.regenerate(1, 2);
-        vec.regenerate(1, 3);
-        vec.regenerate(1, 5);
+        vec.regenerate((1, 1));
+        vec.regenerate((1, 2));
+        vec.regenerate((1, 3));
+        vec.regenerate((1, 5));
 
-        vec.regenerate(2, 1);
+        vec.regenerate((2, 1));
 
-        vec.regenerate(3, 4);
-        vec.regenerate(3, 5);
+        vec.regenerate((3, 4));
+        vec.regenerate((3, 5));
 
-        vec.regenerate(4, 2);
-        vec.regenerate(4, 3);
-        vec.regenerate(4, 5);
+        vec.regenerate((4, 2));
+        vec.regenerate((4, 3));
+        vec.regenerate((4, 5));
 
-        vec.regenerate(5, 1);
-        vec.regenerate(5, 3);
-        vec.regenerate(5, 5);
+        vec.regenerate((5, 1));
+        vec.regenerate((5, 3));
+        vec.regenerate((5, 5));
 
         World {
-            population: vec,
+            grid: vec,
         }
     }
 
-    pub fn population(&self) -> &Population {
-        &(self.population)
+    pub fn grid(&self) -> &Population {
+        &(self.grid)
     }
 }
 
@@ -90,12 +90,12 @@ impl Iterator for World {
     type Item = Population;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let old = self.population.clone();
-        let new = self.population.evolve();
+        let old = self.grid.clone();
+        let new = self.grid.evolve();
 
         // if old == new { return None; }
 
-        self.population = new;
+        self.grid = new;
 
         Some(old)
     }

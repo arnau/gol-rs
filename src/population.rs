@@ -1,18 +1,27 @@
 use std::fmt;
 use itertools::Itertools;
 
+use coord::Dim2 as Coord;
 use cell::Cell;
+use grid::{ Grid, GridItem, GridCoord };
 
 
 #[derive(Debug, Clone, Eq)]
 pub struct Population {
     cells: Vec<Cell>,
+    size: (usize, usize),
     gen: usize,
 }
 
 impl Population {
     pub fn new(cells: Vec<Cell>, gen: usize) -> Self {
-        Population { cells: cells, gen: gen }
+        let size = f32::sqrt(cells.len() as f32) as usize;
+
+        Population {
+            cells: cells,
+            size: (size, size),
+            gen: gen
+        }
     }
 
     pub fn empty(size: usize) -> Self {
@@ -27,41 +36,59 @@ impl Population {
         let mut vec = vec![];
         let size = self.size();
 
-        for x in 0..size {
-            for y in 0..size {
-                vec.push(self.fate(x, y));
-            }
+        for coord in iproduct!(0..size, 0..size) {
+            vec.push(self.item_fate(coord.into()));
         }
 
         Population::new(vec, self.gen + 1)
     }
 
-    pub fn size(&self) -> usize {
-        f32::sqrt(self.cells.len() as f32) as usize
-    }
 
-    pub fn coord(&self, x: usize, y: usize) -> Cell {
-        self.cells[x * self.size() + y]
-    }
 
-    pub fn coords_from(&self, i: usize) -> (usize, usize) {
-        let size = self.size();
-        // (i % (size), i / (size))
-        (i / size, i % size)
-    }
-
-    pub fn idx(&self, i: usize) -> Cell {
-        let size = self.size();
-        let (x, y) = self.coords_from(i);
-        self.coord(x, y)
-    }
-
-    pub fn regenerate(&mut self, x: usize, y: usize) {
+    pub fn regenerate<T: Into<Coord>>(&mut self, coord: T) {
+        let coord: Coord = coord.into();
+        let (x, y) = coord.into();
         let size = self.size();
         self.cells[x * size + y] = Cell::Alive;
     }
 
-    pub fn neighbours(&self, x: usize, y: usize) -> Vec<Cell> {
+    pub fn generation(&self) -> usize {
+        self.gen
+    }
+}
+
+
+impl IntoIterator for Population {
+    type Item = (Coord, Cell);
+    type IntoIter = ::std::vec::IntoIter<Self::Item>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.cells.iter()
+            .enumerate()
+            .map(|(i, &x)| (Coord::from_index(i, self.size()), x))
+            .collect::<Vec<(Coord, Cell)>>()
+            .into_iter()
+    }
+}
+
+
+impl Grid for Population {
+    type Item = Cell;
+    type Coord = Coord;
+
+    fn size(&self) -> usize {
+        self.size.0
+    }
+
+
+    fn item(&self, coord: Coord) -> Cell {
+        let (x, y) = coord.into();
+        self.cells[x * self.size() + y]
+    }
+
+
+    fn item_neighbours(&self, coord: Coord) -> Vec<Cell> {
+        let (x, y) = coord.into();
         let size = self.size();
 
         [(x, dec(y, size)),
@@ -73,40 +100,12 @@ impl Population {
          (dec(x, size), inc(y, size)),
          (inc(x, size), inc(y, size))]
             .into_iter()
-            .map(|&(x, y)| self.coord(x, y))
+            .map(|&x| self.item(x.into()))
             .collect()
     }
-
-
-    /// Any live cell with fewer than two live neighbours dies, as if caused
-    /// by underpopulation.
-    /// Any live cell with two or three live neighbours lives on to the next
-    /// generation.
-    /// Any live cell with more than three live neighbours dies, as if by
-    /// overpopulation.
-    /// Any dead cell with exactly three live neighbours becomes a live cell,
-    /// as if by reproduction.
-    fn fate(&self, x: usize, y: usize) -> Cell {
-        let count = self.neighbours(x, y)
-                        .into_iter()
-                        .filter(|&x| x.is_alive())
-                        .count();
-        let cell = self.coord(x, y);
-        let is_alive = (&cell).is_alive();
-        // println!("{} {}", is_alive, count);
-
-        match (is_alive,  count) {
-            (true, 2...3) => Cell::Alive,
-            (true, _)     => Cell::Dead(0),
-            (false, 3)    => Cell::Alive,
-            (false, _)    => cell.rot(),
-        }
-    }
-
-    pub fn generation(&self) -> usize {
-        self.gen
-    }
 }
+
+
 
 impl fmt::Display for Population {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -207,11 +206,11 @@ pub fn glider(mut population: Population, offset: (usize, usize)) -> Population 
 pub fn glider_br(mut population: Population, offset: (usize, usize)) -> Population {
     let (x, y) = offset;
 
-    population.regenerate(x + 0, y + 1);
-    population.regenerate(x + 1, y + 2);
-    population.regenerate(x + 2, y + 0);
-    population.regenerate(x + 2, y + 1);
-    population.regenerate(x + 2, y + 2);
+    population.regenerate((x + 0, y + 1));
+    population.regenerate((x + 1, y + 2));
+    population.regenerate((x + 2, y + 0));
+    population.regenerate((x + 2, y + 1));
+    population.regenerate((x + 2, y + 2));
 
     population
 }
@@ -224,11 +223,11 @@ pub fn glider_br(mut population: Population, offset: (usize, usize)) -> Populati
 pub fn glider_tl(mut population: Population, offset: (usize, usize)) -> Population {
     let (x, y) = offset;
 
-    population.regenerate(x + 0, y + 0);
-    population.regenerate(x + 0, y + 1);
-    population.regenerate(x + 0, y + 2);
-    population.regenerate(x + 1, y + 0);
-    population.regenerate(x + 2, y + 1);
+    population.regenerate((x + 0, y + 0));
+    population.regenerate((x + 0, y + 1));
+    population.regenerate((x + 0, y + 2));
+    population.regenerate((x + 1, y + 0));
+    population.regenerate((x + 2, y + 1));
 
     population
 }
@@ -241,11 +240,11 @@ pub fn glider_tl(mut population: Population, offset: (usize, usize)) -> Populati
 pub fn glider_bl(mut population: Population, offset: (usize, usize)) -> Population {
     let (x, y) = offset;
 
-    population.regenerate(x + 0, y + 0);
-    population.regenerate(x + 0, y + 1);
-    population.regenerate(x + 0, y + 2);
-    population.regenerate(x + 1, y + 2);
-    population.regenerate(x + 2, y + 1);
+    population.regenerate((x + 0, y + 0));
+    population.regenerate((x + 0, y + 1));
+    population.regenerate((x + 0, y + 2));
+    population.regenerate((x + 1, y + 2));
+    population.regenerate((x + 2, y + 1));
 
     population
 }
@@ -258,11 +257,11 @@ pub fn glider_bl(mut population: Population, offset: (usize, usize)) -> Populati
 pub fn glider_tr(mut population: Population, offset: (usize, usize)) -> Population {
     let (x, y) = offset;
 
-    population.regenerate(x + 0, y + 1);
-    population.regenerate(x + 1, y + 0);
-    population.regenerate(x + 2, y + 0);
-    population.regenerate(x + 2, y + 1);
-    population.regenerate(x + 2, y + 2);
+    population.regenerate((x + 0, y + 1));
+    population.regenerate((x + 1, y + 0));
+    population.regenerate((x + 2, y + 0));
+    population.regenerate((x + 2, y + 1));
+    population.regenerate((x + 2, y + 2));
 
     population
 }
@@ -284,7 +283,7 @@ fn test_glider() {
     ];
 
     for ((x, y), expected) in xs {
-        assert_eq!(glr.coord(x, y), expected);
+        assert_eq!(glr.item(x, y), expected);
     }
 
     assert_eq!(alive, 5);
@@ -330,7 +329,7 @@ fn test_fate() {
     ];
 
     for ((x, y), expected) in xs {
-        assert_eq!(ppl.fate(x, y), expected);
+        assert_eq!(ppl.item_fate(x, y), expected);
     }
 }
 
@@ -340,7 +339,7 @@ fn test_neigbours() {
     let size = 5;
     let offset = (1, 1);
     let ppl = glider(vec![false; size * size].into(), offset);
-    let ns = ppl.neighbours(1, 2);
+    let ns = ppl.item_neighbours(1, 2);
 
     let expected: Population = vec![
         false, false, false,

@@ -8,15 +8,17 @@ use sdl2::rect::{Point, Rect};
 use sdl2::render::Renderer;
 use std::{thread, time};
 
+use grid::Grid;
+use coord::Dim2 as Coord;
 use population::{ glider, glider_br, glider_bl, glider_tl, glider_tr };
 use world::{ World, Population, Cell };
 
 
 pub fn main() {
-    let speed = 30;
-    let n = 50;
-    let cell = 5;
-    let (mut r, mut e) = init((n * cell) as u32);
+    let speed = 10;
+    let n = 100;
+    let cell_size = 5;
+    let (mut r, mut e) = init((n * cell_size) as u32);
     // let mut world = World::glider(n);
     // let mut world = World::random(n);
     // let mut world = World::infinite(n);
@@ -46,7 +48,7 @@ pub fn main() {
 
         if running {
             match *(&world.next()) {
-                Some(ref population) => render(&mut r, &population),
+                Some(ref grid) => render(&mut r, cell_size, &grid),
                 None => {}
             }
 
@@ -77,28 +79,26 @@ fn init<'a>(size: u32)-> (Renderer<'a>, EventPump) {
 }
 
 
-fn render(r: &mut Renderer, population: &Population) {
-    let size = population.size();
+fn render(r: &mut Renderer, cell_size: usize, grid: &Population) {
+    let size = grid.size();
 
-    println!("{}\n\n", population);
+    println!("{}\n\n", grid);
 
     r.set_draw_color(Color::RGB(250, 250, 250));
     r.clear();
 
-    for (i, cell) in population.cells().iter().enumerate() {
-        let (x, y) = population.coords_from(i);
-        display_cell(r, x, y, *cell);
+    for (coord, cell) in grid.clone().into_iter() {
+        display_cell(r, cell_size, coord, cell)
     }
 
     r.present();
 }
 
-fn display_cell(r: &mut Renderer, x: usize, y: usize, cell: Cell) {
-    let width = 5;
-    let height = 5;
+fn display_cell(r: &mut Renderer, cell_size: usize, coord: Coord, cell: Cell) {
+    let (x, y) = coord.into();
 
-    let mut x = width * x;
-    let mut y = height * y;
+    let mut x = cell_size * x;
+    let mut y = cell_size * y;
 
     let cell_color = match cell {
         Cell::Alive => Color::RGB(0, 255, 0),
@@ -113,5 +113,5 @@ fn display_cell(r: &mut Renderer, x: usize, y: usize, cell: Cell) {
     };
 
     r.set_draw_color(cell_color);
-    r.fill_rect(Rect::new(x as i32, y as i32, width as u32, height as u32));
+    r.fill_rect(Rect::new(x as i32, y as i32, cell_size as u32, cell_size as u32));
 }
