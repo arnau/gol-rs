@@ -10,3 +10,7 @@ ndarray = "*"
 itertools = "*"
 glium = "*"
 glutin = "*"
+clippy = {version = "*", optional = true}
+
+[features]
+default = []

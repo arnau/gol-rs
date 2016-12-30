@@ -3,7 +3,7 @@ use itertools::Itertools;
 
 use coord::Dim2 as Coord;
 use cell::Cell;
-use grid::{ Grid, GridItem, GridCoord };
+use grid::Grid;
 
 
 #[derive(Debug, Clone, Eq)]
@@ -190,7 +190,7 @@ fn test_dec() {
 }
 
 
-pub fn glider(mut population: Population, offset: (usize, usize)) -> Population {
+pub fn glider(population: Population, offset: (usize, usize)) -> Population {
     glider_br(population, offset)
 }
 
@@ -206,9 +206,9 @@ pub fn glider(mut population: Population, offset: (usize, usize)) -> Population 
 pub fn glider_br(mut population: Population, offset: (usize, usize)) -> Population {
     let (x, y) = offset;
 
-    population.regenerate((x + 0, y + 1));
+    population.regenerate((x    , y + 1));
     population.regenerate((x + 1, y + 2));
-    population.regenerate((x + 2, y + 0));
+    population.regenerate((x + 2, y    ));
     population.regenerate((x + 2, y + 1));
     population.regenerate((x + 2, y + 2));
 
@@ -223,10 +223,10 @@ pub fn glider_br(mut population: Population, offset: (usize, usize)) -> Populati
 pub fn glider_tl(mut population: Population, offset: (usize, usize)) -> Population {
     let (x, y) = offset;
 
-    population.regenerate((x + 0, y + 0));
-    population.regenerate((x + 0, y + 1));
-    population.regenerate((x + 0, y + 2));
-    population.regenerate((x + 1, y + 0));
+    population.regenerate((x    , y    ));
+    population.regenerate((x    , y + 1));
+    population.regenerate((x    , y + 2));
+    population.regenerate((x + 1, y    ));
     population.regenerate((x + 2, y + 1));
 
     population
@@ -240,9 +240,9 @@ pub fn glider_tl(mut population: Population, offset: (usize, usize)) -> Populati
 pub fn glider_bl(mut population: Population, offset: (usize, usize)) -> Population {
     let (x, y) = offset;
 
-    population.regenerate((x + 0, y + 0));
-    population.regenerate((x + 0, y + 1));
-    population.regenerate((x + 0, y + 2));
+    population.regenerate((x    , y    ));
+    population.regenerate((x    , y + 1));
+    population.regenerate((x    , y + 2));
     population.regenerate((x + 1, y + 2));
     population.regenerate((x + 2, y + 1));
 
@@ -257,9 +257,9 @@ pub fn glider_bl(mut population: Population, offset: (usize, usize)) -> Populati
 pub fn glider_tr(mut population: Population, offset: (usize, usize)) -> Population {
     let (x, y) = offset;
 
-    population.regenerate((x + 0, y + 1));
-    population.regenerate((x + 1, y + 0));
-    population.regenerate((x + 2, y + 0));
+    population.regenerate((x    , y + 1));
+    population.regenerate((x + 1, y    ));
+    population.regenerate((x + 2, y    ));
     population.regenerate((x + 2, y + 1));
     population.regenerate((x + 2, y + 2));
 

@@ -31,7 +31,7 @@ pub trait Grid {
     fn item_fate(&self, coord: Self::Coord) -> Self::Item {
         let count = self.item_neighbours(coord.clone())
                         .into_iter()
-                        .filter(|ref x| x.is_alive())
+                        .filter(|x| x.is_alive())
                         .count();
         let cell = self.item(coord);
         let is_alive = (&cell).is_alive();

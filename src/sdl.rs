@@ -1,15 +1,14 @@
-use std::fmt;
 use sdl2;
 use sdl2::EventPump;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
-use sdl2::rect::{Point, Rect};
+use sdl2::rect::Rect;
 use sdl2::render::Renderer;
-use std::{thread, time};
+use std::{ thread, time };
 
-use grid::Grid;
 use coord::Dim2 as Coord;
+use grid::Grid;
 use population::{ glider, glider_br, glider_bl, glider_tl, glider_tr };
 use world::{ World, Population, Cell };
 
@@ -47,9 +46,8 @@ pub fn main() {
         }
 
         if running {
-            match *(&world.next()) {
-                Some(ref grid) => render(&mut r, cell_size, &grid),
-                None => {}
+            if let Some(ref grid) = world.next() {
+                render(&mut r, cell_size, grid);
             }
 
             thread::sleep(time::Duration::from_millis(speed));
@@ -80,25 +78,24 @@ fn init<'a>(size: u32)-> (Renderer<'a>, EventPump) {
 
 
 fn render(r: &mut Renderer, cell_size: usize, grid: &Population) {
-    let size = grid.size();
-
     println!("{}\n\n", grid);
 
     r.set_draw_color(Color::RGB(250, 250, 250));
     r.clear();
 
-    for (coord, cell) in grid.clone().into_iter() {
+    for (coord, cell) in grid.clone() {
         display_cell(r, cell_size, coord, cell)
     }
 
     r.present();
 }
 
+#[allow(unused_must_use)]
 fn display_cell(r: &mut Renderer, cell_size: usize, coord: Coord, cell: Cell) {
     let (x, y) = coord.into();
 
-    let mut x = cell_size * x;
-    let mut y = cell_size * y;
+    let x = cell_size * x;
+    let y = cell_size * y;
 
     let cell_color = match cell {
         Cell::Alive => Color::RGB(0, 255, 0),

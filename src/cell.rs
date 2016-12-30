@@ -80,7 +80,7 @@ impl fmt::Display for Cell {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
             Cell::Alive => write!(f, "#"),
-            Cell::Dead(x) => write!(f, "."),
+            Cell::Dead(_) => write!(f, "."),
             Cell::Unborn => write!(f, "_"),
         }
     }

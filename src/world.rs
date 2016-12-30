@@ -1,5 +1,3 @@
-use std::fmt;
-use itertools::Itertools;
 use rand::{self, Rng};
 
 pub use cell::Cell;
@@ -33,7 +31,7 @@ impl World {
     }
 
     pub fn glider(size: usize) -> Self {
-        let mut vec = Population::empty(size);
+        let vec = Population::empty(size);
         let offset = (1, 1);
 
         World {
