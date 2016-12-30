@@ -1,5 +1,6 @@
 use rand::{self, Rng};
 
+use grid::Grid;
 pub use cell::Cell;
 pub use population::{ Population, glider };
 
@@ -21,12 +22,16 @@ pub fn sketch() {
 #[derive(Debug, Clone)]
 pub struct World {
     grid: Population,
+    size: (usize, usize),
 }
 
 impl World {
     pub fn new(population: Population) -> Self {
+        let size = population.size();
+
         World {
             grid: population,
+            size: (size, size),
         }
     }
 
@@ -36,6 +41,7 @@ impl World {
 
         World {
             grid: glider(vec, offset),
+            size: (size, size),
         }
     }
 
@@ -49,6 +55,7 @@ impl World {
 
         World {
             grid: vec.into(),
+            size: (size, size),
         }
     }
 
@@ -75,7 +82,12 @@ impl World {
 
         World {
             grid: vec,
+            size: (size, size),
         }
+    }
+
+    pub fn size(&self) -> (usize, usize) {
+        self.size
     }
 
     pub fn grid(&self) -> &Population {

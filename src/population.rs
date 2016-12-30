@@ -61,6 +61,7 @@ impl Population {
 impl IntoIterator for Population {
     type Item = (Coord, Cell);
     type IntoIter = ::std::vec::IntoIter<Self::Item>;
+    // type IntoIter = ::std::vec::IntoIter<(Coord, Cell)>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.cells.iter()

@@ -1,34 +1,31 @@
-use sdl2;
 use sdl2::EventPump;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::Renderer;
+use sdl2;
+use std::fmt::Display;
 use std::{ thread, time };
 
 use coord::Dim2 as Coord;
 use grid::Grid;
-use population::{ glider, glider_br, glider_bl, glider_tl, glider_tr };
-use world::{ World, Population, Cell };
+use world::{ World, Cell };
 
 
-pub fn main() {
-    let speed = 10;
-    let n = 100;
-    let cell_size = 5;
-    let (mut r, mut e) = init((n * cell_size) as u32);
-    // let mut world = World::glider(n);
-    // let mut world = World::random(n);
-    // let mut world = World::infinite(n);
+#[derive(Debug)]
+pub struct Settings {
+    pub delay: usize,
+    pub cell_size: usize,
+}
 
-    // let ppl = glider(glider(Population::empty(n), (0, 0)), (20, 10));
-    let ppl = glider_br(
-        glider_bl(
-            Population::empty(n), (0, 7)
-        ), (28, 0)
-    );
-    let mut world = World::new(ppl);
+
+pub fn run(mut world: World, settings: Settings) {
+    let delay = settings.delay;
+    let cell_size = settings.cell_size;
+    let (width, _) = world.size();
+
+    let (mut r, mut e) = init((width * cell_size) as u32);
 
     let mut running = false;
 
@@ -46,13 +43,50 @@ pub fn main() {
         }
 
         if running {
-            if let Some(ref grid) = world.next() {
+            if let Some(grid) = world.next() {
                 render(&mut r, cell_size, grid);
             }
 
-            thread::sleep(time::Duration::from_millis(speed));
+            thread::sleep(time::Duration::from_millis(delay as u64));
         }
     }
+}
+
+
+fn render<G>(r: &mut Renderer, cell_size: usize, grid: G)
+    where G: Grid + Display + IntoIterator<Item = (Coord, Cell)> {
+
+    println!("{}\n\n", grid);
+
+    r.set_draw_color(Color::RGB(250, 250, 250));
+    r.clear();
+
+    for (coord, cell) in grid {
+        render_cell(r, cell_size, coord, cell)
+    }
+
+    r.present();
+}
+
+#[allow(unused_must_use)]
+fn render_cell(r: &mut Renderer, cell_size: usize, coord: Coord, cell: Cell) {
+    let x = cell_size * coord.x();
+    let y = cell_size * coord.y();
+
+    let cell_color = match cell {
+        Cell::Alive => Color::RGB(0, 255, 0),
+        Cell::Unborn => Color::RGB(255, 255, 255),
+        Cell::Dead(x) => match x {
+            x if x <= 20 => {
+                let y = 250 - (x * 10) as u8;
+                Color::RGB(y, y, y)
+            }
+            _ => Color::RGB(0, 0, 0),
+        }
+    };
+
+    r.set_draw_color(cell_color);
+    r.fill_rect(Rect::new(x as i32, y as i32, cell_size as u32, cell_size as u32));
 }
 
 
@@ -74,41 +108,4 @@ fn init<'a>(size: u32)-> (Renderer<'a>, EventPump) {
     renderer.present();
 
     (renderer, event_pump)
-}
-
-
-fn render(r: &mut Renderer, cell_size: usize, grid: &Population) {
-    println!("{}\n\n", grid);
-
-    r.set_draw_color(Color::RGB(250, 250, 250));
-    r.clear();
-
-    for (coord, cell) in grid.clone() {
-        display_cell(r, cell_size, coord, cell)
-    }
-
-    r.present();
-}
-
-#[allow(unused_must_use)]
-fn display_cell(r: &mut Renderer, cell_size: usize, coord: Coord, cell: Cell) {
-    let (x, y) = coord.into();
-
-    let x = cell_size * x;
-    let y = cell_size * y;
-
-    let cell_color = match cell {
-        Cell::Alive => Color::RGB(0, 255, 0),
-        Cell::Unborn => Color::RGB(255, 255, 255),
-        Cell::Dead(x) => match x {
-            x if x <= 20 => {
-                let y = 250 - (x * 10) as u8;
-                Color::RGB(y, y, y)
-            }
-            _ => Color::RGB(0, 0, 0),
-        }
-    };
-
-    r.set_draw_color(cell_color);
-    r.fill_rect(Rect::new(x as i32, y as i32, cell_size as u32, cell_size as u32));
 }
