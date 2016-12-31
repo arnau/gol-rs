@@ -5,7 +5,6 @@ use sdl2::pixels::Color;
 use sdl2::rect::Rect;
 use sdl2::render::Renderer;
 use sdl2;
-use std::fmt::Display;
 use std::{ thread, time };
 
 use coord::Dim2 as Coord;
@@ -20,7 +19,8 @@ pub struct Settings {
 }
 
 
-pub fn run(mut world: World, settings: Settings) {
+pub fn run<T>(mut world: World<T>, settings: Settings)
+    where T: Grid + IntoIterator<Item = (Coord, Cell)> {
     let delay = settings.delay;
     let cell_size = settings.cell_size;
     let (width, _) = world.size();
@@ -54,7 +54,7 @@ pub fn run(mut world: World, settings: Settings) {
 
 
 fn render<G>(r: &mut Renderer, cell_size: usize, grid: G)
-    where G: Grid + Display + IntoIterator<Item = (Coord, Cell)> {
+    where G: Grid + IntoIterator<Item = (Coord, Cell)> {
 
     println!("{}\n\n", grid);
 

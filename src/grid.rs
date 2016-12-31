@@ -12,9 +12,11 @@
 //! 4. Any dead cell with exactly three live neighbours becomes a live cell,
 //! as if by reproduction.
 
+use std::fmt::Display;
 
-pub trait Grid {
-    type Item: GridItem;
+
+pub trait Grid: Clone + Display + IntoIterator {
+    type Cell: GridItem;
     type Coord: GridCoord + Clone;
 
 
@@ -22,13 +24,15 @@ pub trait Grid {
     fn size(&self) -> usize;
 
     /// The value of the item positioned at the given coords.
-    fn item(&self, coord: Self::Coord) -> Self::Item;
+    fn item(&self, coord: Self::Coord) -> Self::Cell;
 
     /// The item neighbours.
-    fn item_neighbours(&self, coord: Self::Coord) -> Vec<Self::Item>;
+    fn item_neighbours(&self, coord: Self::Coord) -> Vec<Self::Cell>;
+
+    fn evolve(&self) -> Self;
 
     /// Evolves the item to its next state.
-    fn item_fate(&self, coord: Self::Coord) -> Self::Item {
+    fn item_fate(&self, coord: Self::Coord) -> Self::Cell {
         let count = self.item_neighbours(coord.clone())
                         .into_iter()
                         .filter(|x| x.is_alive())

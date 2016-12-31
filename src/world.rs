@@ -2,50 +2,52 @@ use rand::{self, Rng};
 
 use grid::Grid;
 pub use cell::Cell;
-pub use population::{ Population, glider };
 
 
-pub fn sketch() {
-    let n = 5;
-    let world = World::glider(n);
-    // let world = World::random(n);
-    // let world = World::new(vec![None; n]);
+// pub fn sketch() {
+//     let n = 5;
+//     let world: World<Population> = World::glider(n);
+//     // let world = World::random(n);
+//     // let world = World::new(vec![None; n]);
 
-    for ppl in world {
-        println!("{}", ppl);
-    }
-}
+//     for ppl in world {
+//         println!("{}", ppl);
+//     }
+// }
 
 
 
 /// The world of Conway.
 #[derive(Debug, Clone)]
-pub struct World {
-    grid: Population,
+pub struct World<T> {
+    grid: T,
     size: (usize, usize),
 }
 
-impl World {
-    pub fn new(population: Population) -> Self {
-        let size = population.size();
+impl<T: Grid + Into<T>> World<T> {
+    pub fn new(grid: T) -> Self {
+
+        let size = grid.size();
 
         World {
-            grid: population,
+            grid: grid,
             size: (size, size),
         }
     }
 
-    pub fn glider(size: usize) -> Self {
-        let vec = Population::empty(size);
-        let offset = (1, 1);
+    // pub fn glider(size: usize) -> Self
+    //     where T: Grid {
+    //     let vec = T::empty(size);
+    //     let offset = (1, 1);
 
-        World {
-            grid: glider(vec, offset),
-            size: (size, size),
-        }
-    }
+    //     World {
+    //         grid: glider(vec, offset),
+    //         size: (size, size),
+    //     }
+    // }
 
-    pub fn random(size: usize) -> Self {
+    pub fn random(size: usize) -> Self
+        where T: From<Vec<bool>> {
         let mut rng = rand::thread_rng();
         let mut vec: Vec<bool> = Vec::new();
 
@@ -59,45 +61,46 @@ impl World {
         }
     }
 
-    pub fn infinite(size: usize) -> Self {
-        let mut vec = Population::empty(size);
+    // pub fn infinite(size: usize) -> Self
+    //     where T: Grid {
+    //     let mut vec = T::empty(size);
 
-        vec.regenerate((1, 1));
-        vec.regenerate((1, 2));
-        vec.regenerate((1, 3));
-        vec.regenerate((1, 5));
+    //     vec.regenerate((1, 1));
+    //     vec.regenerate((1, 2));
+    //     vec.regenerate((1, 3));
+    //     vec.regenerate((1, 5));
 
-        vec.regenerate((2, 1));
+    //     vec.regenerate((2, 1));
 
-        vec.regenerate((3, 4));
-        vec.regenerate((3, 5));
+    //     vec.regenerate((3, 4));
+    //     vec.regenerate((3, 5));
 
-        vec.regenerate((4, 2));
-        vec.regenerate((4, 3));
-        vec.regenerate((4, 5));
+    //     vec.regenerate((4, 2));
+    //     vec.regenerate((4, 3));
+    //     vec.regenerate((4, 5));
 
-        vec.regenerate((5, 1));
-        vec.regenerate((5, 3));
-        vec.regenerate((5, 5));
+    //     vec.regenerate((5, 1));
+    //     vec.regenerate((5, 3));
+    //     vec.regenerate((5, 5));
 
-        World {
-            grid: vec,
-            size: (size, size),
-        }
-    }
+    //     World {
+    //         grid: vec,
+    //         size: (size, size),
+    //     }
+    // }
 
     pub fn size(&self) -> (usize, usize) {
         self.size
     }
 
-    pub fn grid(&self) -> &Population {
+    pub fn grid(&self) -> &T {
         &(self.grid)
     }
 }
 
 
-impl Iterator for World {
-    type Item = Population;
+impl<T: Grid + Into<T>> Iterator for World<T> {
+    type Item = T;
 
     fn next(&mut self) -> Option<Self::Item> {
         let old = self.grid.clone();

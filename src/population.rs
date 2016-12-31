@@ -32,19 +32,6 @@ impl Population {
         &self.cells
     }
 
-    pub fn evolve(&self) -> Self {
-        let mut vec = vec![];
-        let size = self.size();
-
-        for coord in iproduct!(0..size, 0..size) {
-            vec.push(self.item_fate(coord.into()));
-        }
-
-        Population::new(vec, self.gen + 1)
-    }
-
-
-
     pub fn regenerate<T: Into<Coord>>(&mut self, coord: T) {
         let coord: Coord = coord.into();
         let (x, y) = coord.into();
@@ -61,7 +48,6 @@ impl Population {
 impl IntoIterator for Population {
     type Item = (Coord, Cell);
     type IntoIter = ::std::vec::IntoIter<Self::Item>;
-    // type IntoIter = ::std::vec::IntoIter<(Coord, Cell)>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.cells.iter()
@@ -74,7 +60,7 @@ impl IntoIterator for Population {
 
 
 impl Grid for Population {
-    type Item = Cell;
+    type Cell = Cell;
     type Coord = Coord;
 
     fn size(&self) -> usize {
@@ -103,6 +89,17 @@ impl Grid for Population {
             .into_iter()
             .map(|&x| self.item(x.into()))
             .collect()
+    }
+
+    fn evolve(&self) -> Self {
+        let mut vec = vec![];
+        let size = self.size();
+
+        for coord in iproduct!(0..size, 0..size) {
+            vec.push(self.item_fate(coord.into()));
+        }
+
+        Population::new(vec, self.gen + 1)
     }
 }
 
