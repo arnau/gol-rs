@@ -10,8 +10,9 @@ extern crate rand;
 pub mod grid;
 pub mod coord;
 pub mod cell;
-pub mod population;
 pub mod world;
+pub mod population;
+pub mod community;
 
 // mod board;
 pub mod sdl;

@@ -1,3 +1,5 @@
+//! Grid implementation using `Vec<Cell>`.
+
 use std::fmt;
 use itertools::Itertools;
 
