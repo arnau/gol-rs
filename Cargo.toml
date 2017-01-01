@@ -7,6 +7,10 @@ authors = ["Arnau Siches <asiches@gmail.com>"]
 sdl2 = "0.27"
 rand = "0.3"
 ndarray = "*"
+# rulinalg = "*"
+
+# https://docs.rs/cgmath/0.12.0/cgmath/trait.Rotation2.html
+# cgmath = "*"
 itertools = "*"
 glium = "*"
 glutin = "*"

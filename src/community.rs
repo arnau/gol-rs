@@ -27,6 +27,10 @@ impl Community {
             gen: gen
         }
     }
+
+    pub fn empty(n: usize) -> Self {
+        Community::new(Array2::from_elem((n as Ix, n as Ix), Cell::Unborn), 1)
+    }
 }
 
 
@@ -135,12 +139,126 @@ fn dec(x: usize, n: usize) -> usize {
 
 pub fn glider_br(mut grid: Community, offset: (usize, usize)) -> Community {
     let (x, y) = offset;
+    let size = grid.size();
+    let lower_x = 0 + x as isize;
+    let upper_x = 3 + x as isize;
+    let lower_y = 0 + y as isize;
+    let upper_y = 3 + y as isize;
 
-    grid.cells[[x    , y + 1]] = Cell::Alive;
-    grid.cells[[x + 1, y + 2]] = Cell::Alive;
-    grid.cells[[x + 2, y    ]] = Cell::Alive;
-    grid.cells[[x + 2, y + 1]] = Cell::Alive;
-    grid.cells[[x + 2, y + 2]] = Cell::Alive;
+    let a = arr2(&[
+        [Cell::Unborn, Cell::Alive , Cell::Unborn],
+        [Cell::Unborn, Cell::Unborn, Cell::Alive ],
+        [Cell::Alive , Cell::Alive , Cell::Alive ],
+    ]);
+    let b = arr2(&[
+        [Cell::Unborn, Cell::Alive , Cell::Alive],
+        [Cell::Alive , Cell::Unborn, Cell::Alive ],
+        [Cell::Unborn, Cell::Unborn, Cell::Alive ],
+    ]);
+
+
+
+
+    grid.cells.slice_mut(s![lower_x..upper_x, lower_y..upper_y]).assign(&a);
 
     grid
+}
+
+
+pub trait Pattern {
+    fn size(&self) -> (usize, usize);
+    fn offset(&self) -> (usize, usize);
+    fn pattern(&self) -> Array2<Cell>;
+}
+
+
+#[derive(Debug, Clone)]
+pub enum Glider {
+    BottomLeft(usize, usize),
+    BottomRight(usize, usize),
+    TopLeft(usize, usize),
+    TopRight(usize, usize),
+}
+
+impl Pattern for Glider {
+    fn size(&self) -> (usize, usize) {
+        (3, 3)
+    }
+
+    fn offset(&self) -> (usize, usize) {
+        match *self {
+            Glider::BottomLeft(x, y) => (x, y),
+            Glider::BottomRight(x, y) => (x, y),
+            Glider::TopLeft(x, y) => (x, y),
+            Glider::TopRight(x, y) => (x, y),
+        }
+    }
+
+    fn pattern(&self) -> Array2<Cell> {
+        let (n, m) = self.size();
+        let mut canvas = Array2::from_elem((n as Ix, m as Ix), Cell::Unborn);
+        let mut base = arr2(&[
+            [Cell::Unborn, Cell::Alive , Cell::Unborn],
+            [Cell::Unborn, Cell::Unborn, Cell::Alive ],
+            [Cell::Alive , Cell::Alive , Cell::Alive ],
+        ]);
+
+        let layout = match *self {
+            Glider::BottomLeft(_, _) => {
+                &base.invert_axis(Axis(1));
+                base
+            }
+            Glider::BottomRight(_, _) => {
+                base
+            }
+            Glider::TopLeft(_, _) => {
+                &base.invert_axis(Axis(0));
+                &base.invert_axis(Axis(1));
+                base
+            }
+            Glider::TopRight(_, _) => {
+                &base.invert_axis(Axis(1));
+                base.reversed_axes()
+            }
+        };
+
+        // canvas.slice_mut(s![1..-1, 1..-1]).assign(&layout);
+        canvas.assign(&layout);
+
+        canvas
+    }
+}
+
+impl<T: Pattern> From<(Vec<T>, usize)> for Community {
+    fn from(input: (Vec<T>, usize)) -> Community {
+        let (patterns, n) = input;
+        let mut grid = Community::empty(n);
+
+        for pattern in patterns {
+            if pattern.size() <= (n, n) {
+                assign(&mut grid, pattern);
+            } else {
+                panic!("Patterns must be smaller than the recipient grid");
+            }
+        }
+
+        grid
+    }
+}
+
+
+fn assign<T: Pattern>(mut grid: &mut Community, pattern: T) {
+    let (x, y) = pattern.offset();
+    let (n, m) = pattern.size();
+
+    let lower_x = (0 + x) as isize;
+    let upper_x = (n + x) as isize;
+    let lower_y = (0 + y) as isize;
+    let upper_y = (m + y) as isize;
+
+    let a = pattern.pattern();
+
+    grid.cells
+        .slice_mut(s![lower_x..upper_x, lower_y..upper_y])
+        .assign(&a);
 }
