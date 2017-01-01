@@ -262,3 +262,49 @@ fn assign<T: Pattern>(mut grid: &mut Community, pattern: T) {
         .slice_mut(s![lower_x..upper_x, lower_y..upper_y])
         .assign(&a);
 }
+
+
+#[derive(Debug, Clone)]
+pub enum Blinker {
+    TopBottom(usize, usize),
+    LeftRight(usize, usize),
+}
+
+impl Pattern for Blinker {
+    fn size(&self) -> (usize, usize) {
+        (3, 3)
+    }
+
+    fn offset(&self) -> (usize, usize) {
+        match *self {
+            Blinker::TopBottom(x, y) => (x, y),
+            Blinker::LeftRight(x, y) => (x, y),
+        }
+    }
+
+    fn pattern(&self) -> Array2<Cell> {
+        let (n, m) = self.size();
+        let mut canvas = Array2::from_elem((n as Ix, m as Ix), Cell::Unborn);
+        let mut base = arr2(&[
+            [Cell::Unborn, Cell::Alive, Cell::Unborn],
+            [Cell::Unborn, Cell::Alive, Cell::Unborn],
+            [Cell::Unborn, Cell::Alive, Cell::Unborn],
+        ]);
+
+        let layout = match *self {
+            Blinker::TopBottom(_, _) => {
+                base
+            }
+            Blinker::LeftRight(_, _) => {
+                &base.invert_axis(Axis(1));
+                base
+            }
+        };
+
+        // canvas.slice_mut(s![1..-1, 1..-1]).assign(&layout);
+        canvas.assign(&layout);
+
+        canvas
+    }
+}
+
