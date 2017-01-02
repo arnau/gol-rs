@@ -35,6 +35,13 @@ impl Community {
         Community::new(Array2::from_elem((n as Ix, n as Ix), Cell::Unborn), 1)
     }
 
+    pub fn random(n: usize) -> Self {
+        let mut grid = Community::empty(n);
+        grid.insert(Layout::new((0, 0), Random(n, n)));
+
+        grid
+    }
+
     /// Mix in a pattern
     pub fn insert<T: Pattern<Array2<Cell>>>(&mut self, layout: Layout<T>) {
         let (x, y) = layout.offset();
@@ -177,19 +184,11 @@ impl Pattern<Matrix> for Blinker {
     }
 
     fn pattern(&self) -> Matrix {
-        let mut canvas = arr2(&[
+        arr2(&[
             [Cell::Unborn, Cell::Alive, Cell::Unborn],
             [Cell::Unborn, Cell::Alive, Cell::Unborn],
             [Cell::Unborn, Cell::Alive, Cell::Unborn],
-        ]);
-
-        match *self {
-            Blinker::TopBottom => canvas,
-            Blinker::LeftRight => {
-                &canvas.invert_axis(Axis(1));
-                canvas
-            }
-        }
+        ])
     }
 }
 
@@ -318,17 +317,23 @@ impl Pattern<Matrix> for Pentadecathlon {
         Array::from_shape_vec((n as Ix, m as Ix), raw).unwrap()
     }
 }
-    // pub fn random(size: usize) -> Self
-    //     where T: From<Vec<bool>> {
-    //     let mut rng = rand::thread_rng();
-    //     let mut vec: Vec<bool> = Vec::new();
 
-    //     for _ in  0..(size * size) {
-    //         vec.push(rng.gen());
-    //     }
 
-    //     World {
-    //         grid: vec.into(),
-    //         size: (size, size),
-    //     }
-    // }
+impl Pattern<Matrix> for Random {
+    fn size(&self) -> (usize, usize) {
+        (self.0, self.1)
+    }
+
+    fn pattern(&self) -> Matrix {
+        let (n, m) = self.size();
+        let mut rng = rand::thread_rng();
+        let mut canvas = Array2::from_elem((n as Ix, m as Ix), Cell::Unborn);
+
+        for (x, y) in  iproduct!(0..n, 0..m) {
+            let cell: bool = rng.gen();
+            canvas[[x, y]] = cell.into();
+        }
+
+        canvas
+    }
+}

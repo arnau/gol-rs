@@ -42,6 +42,12 @@ impl<T: Pattern<Matrix>> Layout<T> {
 
 
 #[derive(Debug, Clone)]
+pub struct Random(pub usize, pub usize);
+
+#[derive(Debug, Clone)]
+pub struct Blinker;
+
+#[derive(Debug, Clone)]
 pub struct Toad;
 
 #[derive(Debug, Clone)]
@@ -60,11 +66,4 @@ pub enum Glider {
     BottomRight,
     TopLeft,
     TopRight,
-}
-
-
-#[derive(Debug, Clone)]
-pub enum Blinker {
-    TopBottom,
-    LeftRight,
 }

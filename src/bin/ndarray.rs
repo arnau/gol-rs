@@ -17,7 +17,8 @@ fn main() {
     };
 
     let n = 50;
-    let mut grid = Community::empty(n);
+    // let mut grid = Community::empty(n);
+    let mut grid = Community::random(n);
 
     // grid.insert(Layout::new((5, 5), Toad));
     // grid.insert(Layout::new((10, 15), Blinker::TopBottom));
@@ -26,7 +27,8 @@ fn main() {
     // grid.insert(Layout::new((16, 16), Glider::BottomRight));
     // grid.insert(Layout::new((45, 35), Beacon));
     // grid.insert(Layout::new((20, 20), Pulsar));
-    grid.insert(Layout::new((20, 20), Pentadecathlon));
+    // grid.insert(Layout::new((20, 20), Pentadecathlon));
+
 
     // println!("{:?}", grid);
     let world = World::new(grid);
