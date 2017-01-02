@@ -11,7 +11,6 @@ use grid::Grid;
 use pattern::*;
 
 type Matrix = Array2<Cell>;
-type Offset = (usize, usize);
 
 #[derive(Debug, Clone, Eq)]
 pub struct Community {
@@ -43,6 +42,11 @@ impl Community {
 
         if layout.size() > self.size {
             panic!("Patterns must be smaller than the recipient grid");
+        }
+
+        if (n + x, m + y) > self.size {
+            panic!("Pattern size {:?} with offset {:?} overflows grid of {:?}",
+                   layout.size(), layout.offset(), self.size);
         }
 
         let lower_x = (0 + x) as isize;
