@@ -289,7 +289,35 @@ impl Pattern<Matrix> for Pulsar {
     }
 }
 
+impl Pattern<Matrix> for Pentadecathlon {
+    fn size(&self) -> (usize, usize) {
+        (16, 9)
+    }
 
+    fn pattern(&self) -> Matrix {
+        let (n, m) = self.size();
+        let raw: Vec<Cell> = [
+            0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 1, 0, 0, 0, 0,
+            0, 0, 0, 1, 1, 1, 0, 0, 0,
+            0, 0, 1, 0, 1, 0, 1, 0, 0,
+            0, 0, 1, 0, 1, 0, 1, 0, 0,
+            0, 0, 0, 1, 1, 1, 0, 0, 0,
+            0, 0, 0, 0, 1, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 1, 0, 0, 0, 0,
+            0, 0, 0, 1, 1, 1, 0, 0, 0,
+            0, 0, 1, 0, 1, 0, 1, 0, 0,
+            0, 0, 1, 0, 1, 0, 1, 0, 0,
+            0, 0, 0, 1, 1, 1, 0, 0, 0,
+            0, 0, 0, 0, 1, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0,
+        ].into_iter().map(|&x| x.into()).collect();
+
+        Array::from_shape_vec((n as Ix, m as Ix), raw).unwrap()
+    }
+}
     // pub fn random(size: usize) -> Self
     //     where T: From<Vec<bool>> {
     //     let mut rng = rand::thread_rng();

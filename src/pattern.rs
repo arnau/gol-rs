@@ -50,6 +50,8 @@ pub struct Beacon;
 #[derive(Debug, Clone)]
 pub struct Pulsar;
 
+#[derive(Debug, Clone)]
+pub struct Pentadecathlon;
 
 
 #[derive(Debug, Clone)]
