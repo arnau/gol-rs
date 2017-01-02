@@ -4,27 +4,27 @@ extern crate conway;
 use ndarray::prelude::*;
 
 use conway::world::World;
-use conway::community::{ Community, Glider, Blinker };
+use conway::pattern::*;
+use conway::community::Community;
 use conway::cell::Cell;
 use conway::sdl;
 
 
 fn main() {
     let settings = sdl::Settings {
-        delay: 120,
-        cell_size: 5,
+        delay: 50,
+        cell_size: 10,
     };
 
     let n = 50;
-    let patterns = vec![
-        // Glider::BottomRight(0, 0),
-        // Glider::BottomLeft(25, 25),
-        // Glider::TopLeft(14, 19),
-        // Glider::TopRight(30, 15),
-        Blinker::TopBottom(10, 10),
-        Blinker::LeftRight(20, 10),
-    ];
-    let grid = Community::from((patterns, n));
+    let mut grid = Community::empty(n);
+
+    // grid.insert(Layout::new((5, 5), Toad));
+    // grid.insert(Layout::new((10, 15), Blinker::TopBottom));
+    // grid.insert(Layout::new((25, 20), Glider::BottomRight));
+    // grid.insert(Layout::new((25, 20), Glider::TopRight));
+    // grid.insert(Layout::new((45, 35), Beacon));
+    grid.insert(Layout::new((20, 20), Pulsar));
 
     // println!("{:?}", grid);
     let world = World::new(grid);

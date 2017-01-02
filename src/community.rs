@@ -7,7 +7,10 @@ use ndarray::prelude::*;
 use coord::Dim2 as Coord;
 use cell::Cell;
 use grid::Grid;
+use pattern::*;
 
+type Matrix = Array2<Cell>;
+type Offset = (usize, usize);
 
 #[derive(Debug, Clone, Eq)]
 pub struct Community {
@@ -30,6 +33,27 @@ impl Community {
 
     pub fn empty(n: usize) -> Self {
         Community::new(Array2::from_elem((n as Ix, n as Ix), Cell::Unborn), 1)
+    }
+
+    /// Mix in a pattern
+    pub fn insert<T: Pattern<Array2<Cell>>>(&mut self, layout: Layout<T>) {
+        let (x, y) = layout.offset();
+        let (n, m) = layout.size();
+
+        if layout.size() > self.size {
+            panic!("Patterns must be smaller than the recipient grid");
+        }
+
+        let lower_x = (0 + x) as isize;
+        let upper_x = (n + x) as isize;
+        let lower_y = (0 + y) as isize;
+        let upper_y = (m + y) as isize;
+
+        let a = layout.pattern();
+
+        self.cells
+            .slice_mut(s![lower_x..upper_x, lower_y..upper_y])
+            .assign(&a);
     }
 }
 
@@ -137,174 +161,125 @@ fn dec(x: usize, n: usize) -> usize {
 }
 
 
-pub fn glider_br(mut grid: Community, offset: (usize, usize)) -> Community {
-    let (x, y) = offset;
-    let size = grid.size();
-    let lower_x = 0 + x as isize;
-    let upper_x = 3 + x as isize;
-    let lower_y = 0 + y as isize;
-    let upper_y = 3 + y as isize;
-
-    let a = arr2(&[
-        [Cell::Unborn, Cell::Alive , Cell::Unborn],
-        [Cell::Unborn, Cell::Unborn, Cell::Alive ],
-        [Cell::Alive , Cell::Alive , Cell::Alive ],
-    ]);
-    let b = arr2(&[
-        [Cell::Unborn, Cell::Alive , Cell::Alive],
-        [Cell::Alive , Cell::Unborn, Cell::Alive ],
-        [Cell::Unborn, Cell::Unborn, Cell::Alive ],
-    ]);
+///////////////////////////////////////////////////////////////////////////////
+// Patterns
+///////////////////////////////////////////////////////////////////////////////
 
 
-
-
-    grid.cells.slice_mut(s![lower_x..upper_x, lower_y..upper_y]).assign(&a);
-
-    grid
-}
-
-
-pub trait Pattern {
-    fn size(&self) -> (usize, usize);
-    fn offset(&self) -> (usize, usize);
-    fn pattern(&self) -> Array2<Cell>;
-}
-
-
-#[derive(Debug, Clone)]
-pub enum Glider {
-    BottomLeft(usize, usize),
-    BottomRight(usize, usize),
-    TopLeft(usize, usize),
-    TopRight(usize, usize),
-}
-
-impl Pattern for Glider {
+impl Pattern<Matrix> for Blinker {
     fn size(&self) -> (usize, usize) {
         (3, 3)
     }
 
-    fn offset(&self) -> (usize, usize) {
+    fn pattern(&self) -> Matrix {
+        let mut canvas = arr2(&[
+            [Cell::Unborn, Cell::Alive, Cell::Unborn],
+            [Cell::Unborn, Cell::Alive, Cell::Unborn],
+            [Cell::Unborn, Cell::Alive, Cell::Unborn],
+        ]);
+
         match *self {
-            Glider::BottomLeft(x, y) => (x, y),
-            Glider::BottomRight(x, y) => (x, y),
-            Glider::TopLeft(x, y) => (x, y),
-            Glider::TopRight(x, y) => (x, y),
+            Blinker::TopBottom => canvas,
+            Blinker::LeftRight => {
+                &canvas.invert_axis(Axis(1));
+                canvas
+            }
         }
     }
+}
 
-    fn pattern(&self) -> Array2<Cell> {
-        let (n, m) = self.size();
-        let mut canvas = Array2::from_elem((n as Ix, m as Ix), Cell::Unborn);
-        let mut base = arr2(&[
+
+impl Pattern<Matrix> for Toad {
+    fn size(&self) -> (usize, usize) {
+        (4, 4)
+    }
+
+    fn pattern(&self) -> Matrix {
+        arr2(&[
+            [Cell::Unborn, Cell::Unborn, Cell::Unborn, Cell::Unborn],
+            [Cell::Unborn, Cell::Alive , Cell::Alive , Cell::Alive],
+            [Cell::Alive , Cell::Alive , Cell::Alive , Cell::Unborn],
+            [Cell::Unborn, Cell::Unborn, Cell::Unborn, Cell::Unborn],
+        ])
+    }
+}
+
+
+impl Pattern<Matrix> for Glider {
+    fn size(&self) -> (usize, usize) {
+        (3, 3)
+    }
+
+    fn pattern(&self) -> Matrix {
+        let mut canvas = arr2(&[
             [Cell::Unborn, Cell::Alive , Cell::Unborn],
             [Cell::Unborn, Cell::Unborn, Cell::Alive ],
             [Cell::Alive , Cell::Alive , Cell::Alive ],
         ]);
 
-        let layout = match *self {
-            Glider::BottomLeft(_, _) => {
-                &base.invert_axis(Axis(1));
-                base
-            }
-            Glider::BottomRight(_, _) => {
-                base
-            }
-            Glider::TopLeft(_, _) => {
-                &base.invert_axis(Axis(0));
-                &base.invert_axis(Axis(1));
-                base
-            }
-            Glider::TopRight(_, _) => {
-                &base.invert_axis(Axis(1));
-                base.reversed_axes()
-            }
-        };
-
-        // canvas.slice_mut(s![1..-1, 1..-1]).assign(&layout);
-        canvas.assign(&layout);
-
-        canvas
-    }
-}
-
-impl<T: Pattern> From<(Vec<T>, usize)> for Community {
-    fn from(input: (Vec<T>, usize)) -> Community {
-        let (patterns, n) = input;
-        let mut grid = Community::empty(n);
-
-        for pattern in patterns {
-            if pattern.size() <= (n, n) {
-                assign(&mut grid, pattern);
-            } else {
-                panic!("Patterns must be smaller than the recipient grid");
-            }
-        }
-
-        grid
-    }
-}
-
-
-fn assign<T: Pattern>(mut grid: &mut Community, pattern: T) {
-    let (x, y) = pattern.offset();
-    let (n, m) = pattern.size();
-
-    let lower_x = (0 + x) as isize;
-    let upper_x = (n + x) as isize;
-    let lower_y = (0 + y) as isize;
-    let upper_y = (m + y) as isize;
-
-    let a = pattern.pattern();
-
-    grid.cells
-        .slice_mut(s![lower_x..upper_x, lower_y..upper_y])
-        .assign(&a);
-}
-
-
-#[derive(Debug, Clone)]
-pub enum Blinker {
-    TopBottom(usize, usize),
-    LeftRight(usize, usize),
-}
-
-impl Pattern for Blinker {
-    fn size(&self) -> (usize, usize) {
-        (3, 3)
-    }
-
-    fn offset(&self) -> (usize, usize) {
         match *self {
-            Blinker::TopBottom(x, y) => (x, y),
-            Blinker::LeftRight(x, y) => (x, y),
+            Glider::BottomLeft => {
+                &canvas.invert_axis(Axis(1));
+                canvas
+            }
+            Glider::BottomRight => {
+                canvas
+            }
+            Glider::TopLeft => {
+                &canvas.invert_axis(Axis(0));
+                &canvas.invert_axis(Axis(1));
+                canvas
+            }
+            Glider::TopRight => {
+                &canvas.invert_axis(Axis(1));
+                canvas.reversed_axes()
+            }
         }
-    }
-
-    fn pattern(&self) -> Array2<Cell> {
-        let (n, m) = self.size();
-        let mut canvas = Array2::from_elem((n as Ix, m as Ix), Cell::Unborn);
-        let mut base = arr2(&[
-            [Cell::Unborn, Cell::Alive, Cell::Unborn],
-            [Cell::Unborn, Cell::Alive, Cell::Unborn],
-            [Cell::Unborn, Cell::Alive, Cell::Unborn],
-        ]);
-
-        let layout = match *self {
-            Blinker::TopBottom(_, _) => {
-                base
-            }
-            Blinker::LeftRight(_, _) => {
-                &base.invert_axis(Axis(1));
-                base
-            }
-        };
-
-        // canvas.slice_mut(s![1..-1, 1..-1]).assign(&layout);
-        canvas.assign(&layout);
-
-        canvas
     }
 }
 
+
+impl Pattern<Matrix> for Beacon {
+    fn size(&self) -> (usize, usize) {
+        (4, 4)
+    }
+
+    fn pattern(&self) -> Matrix {
+        arr2(&[
+            [Cell::Alive , Cell::Alive , Cell::Unborn, Cell::Unborn],
+            [Cell::Alive , Cell::Unborn, Cell::Unborn, Cell::Unborn],
+            [Cell::Unborn, Cell::Unborn, Cell::Unborn, Cell::Alive ],
+            [Cell::Unborn, Cell::Unborn, Cell::Alive , Cell::Alive ],
+        ])
+    }
+}
+
+
+impl Pattern<Matrix> for Pulsar {
+    fn size(&self) -> (usize, usize) {
+        (15, 15)
+    }
+
+    fn pattern(&self) -> Matrix {
+        let (n, m) = self.size();
+        let raw: Vec<Cell> = [
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0,
+            0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0,
+            0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0,
+            0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0,
+            0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0,
+            0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0,
+            0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        ].into_iter().map(|&x| x.into()).collect();
+
+        Array::from_shape_vec((n as Ix, m as Ix), raw).unwrap()
+    }
+}
