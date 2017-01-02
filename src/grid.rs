@@ -67,3 +67,56 @@ pub trait GridItem {
 }
 
 pub trait GridCoord {}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Infinite grid
+///////////////////////////////////////////////////////////////////////////////
+
+pub fn inc(x: usize, n: usize) -> usize {
+    let x = x + 1;
+
+    if x >= n {
+        x % n
+    } else {
+        x
+    }
+}
+
+#[test]
+fn test_inc() {
+    let size = 3;
+    let xs = vec![
+        (0, 1),
+        (1, 2),
+        (2, 0),
+    ];
+
+    for (x, y) in xs {
+        assert_eq!(inc(x, size), y)
+    }
+}
+
+
+pub fn dec(x: usize, n: usize) -> usize {
+    if x == 0 {
+        n - 1
+    } else {
+        x - 1
+    }
+}
+
+#[test]
+fn test_dec() {
+    let size = 3;
+    let xs = vec![
+        (0, 2),
+        (1, 0),
+        (2, 1),
+    ];
+
+    for (x, y) in xs {
+        assert_eq!(dec(x, size), y)
+    }
+}

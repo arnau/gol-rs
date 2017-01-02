@@ -5,7 +5,7 @@ use itertools::Itertools;
 
 use coord::Dim2 as Coord;
 use cell::Cell;
-use grid::Grid;
+use grid::{ Grid, GridItem, inc, dec };
 
 
 #[derive(Debug, Clone, Eq)]
@@ -142,54 +142,6 @@ impl From<Vec<Cell>> for Population {
 
 
 
-fn inc(x: usize, n: usize) -> usize {
-    let x = x + 1;
-
-    if x >= n {
-        x % n
-    } else {
-        x
-    }
-}
-
-#[test]
-fn test_inc() {
-    let size = 3;
-    let xs = vec![
-        (0, 1),
-        (1, 2),
-        (2, 0),
-    ];
-
-    for (x, y) in xs {
-        assert_eq!(inc(x, size), y)
-    }
-}
-
-
-fn dec(x: usize, n: usize) -> usize {
-    if x == 0 {
-        n - 1
-    } else {
-        x - 1
-    }
-}
-
-#[test]
-fn test_dec() {
-    let size = 3;
-    let xs = vec![
-        (0, 2),
-        (1, 0),
-        (2, 1),
-    ];
-
-    for (x, y) in xs {
-        assert_eq!(dec(x, size), y)
-    }
-}
-
-
 pub fn glider(population: Population, offset: (usize, usize)) -> Population {
     glider_br(population, offset)
 }
@@ -283,34 +235,11 @@ fn test_glider() {
     ];
 
     for ((x, y), expected) in xs {
-        assert_eq!(glr.item(x, y), expected);
+        assert_eq!(glr.item((x, y).into()), expected);
     }
 
     assert_eq!(alive, 5);
 }
-
-// blinker =
-//     [ (0, 0), (1, 0), (2, 0) ]
-
-
-// toad =
-//     [         (1, 0), (2, 0), (3, 0)
-//     , (0, 1), (1, 1), (2, 1)
-//     ]
-
-// beacon =
-//     [ (0, 0), (1, 0)
-//     , (0, 1), (1, 1)
-//     ,                 (2, 2), (3, 2)
-//     ,                 (2, 3), (3, 3)
-//     ]
-
-// acorn =
-//     [         (1, 0)
-//     ,                         (3, 1)
-//     , (0, 2), (1, 2),                (4, 2), (5, 2), (6, 2)
-//     ]
-
 
 
 #[test]
@@ -329,7 +258,7 @@ fn test_fate() {
     ];
 
     for ((x, y), expected) in xs {
-        assert_eq!(ppl.item_fate(x, y), expected);
+        assert_eq!(ppl.item_fate((x, y).into()), expected);
     }
 }
 
@@ -339,7 +268,7 @@ fn test_neigbours() {
     let size = 5;
     let offset = (1, 1);
     let ppl = glider(vec![false; size * size].into(), offset);
-    let ns = ppl.item_neighbours(1, 2);
+    let ns = ppl.item_neighbours((1, 2).into());
 
     let expected: Population = vec![
         false, false, false,

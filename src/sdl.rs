@@ -7,9 +7,10 @@ use sdl2::render::Renderer;
 use sdl2;
 use std::{ thread, time };
 
+use cell::Cell;
 use coord::Dim2 as Coord;
 use grid::Grid;
-use world::{ World, Cell };
+use world::World;
 
 
 #[derive(Debug)]

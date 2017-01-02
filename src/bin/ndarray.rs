@@ -22,7 +22,7 @@ fn main() {
     // grid.insert(Layout::new((5, 5), Toad));
     // grid.insert(Layout::new((10, 15), Blinker::TopBottom));
     // grid.insert(Layout::new((25, 20), Glider::BottomRight));
-    // grid.insert(Layout::new((25, 20), Glider::TopRight));
+    grid.insert(Layout::new((0, 0), Glider::TopRight));
     // grid.insert(Layout::new((45, 35), Beacon));
     grid.insert(Layout::new((20, 20), Pulsar));
 

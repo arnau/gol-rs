@@ -1,8 +1,9 @@
 //! Grid implementation using `ndarray::Array2<Cell>`.
 
-use std::fmt;
 use itertools::Itertools;
 use ndarray::prelude::*;
+use rand::{self, Rng};
+use std::fmt;
 
 use coord::Dim2 as Coord;
 use cell::Cell;
@@ -283,3 +284,19 @@ impl Pattern<Matrix> for Pulsar {
         Array::from_shape_vec((n as Ix, m as Ix), raw).unwrap()
     }
 }
+
+
+    // pub fn random(size: usize) -> Self
+    //     where T: From<Vec<bool>> {
+    //     let mut rng = rand::thread_rng();
+    //     let mut vec: Vec<bool> = Vec::new();
+
+    //     for _ in  0..(size * size) {
+    //         vec.push(rng.gen());
+    //     }
+
+    //     World {
+    //         grid: vec.into(),
+    //         size: (size, size),
+    //     }
+    // }
