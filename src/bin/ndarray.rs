@@ -28,7 +28,8 @@ fn main() {
     // grid.insert(Layout::new((45, 35), Beacon));
     // grid.insert(Layout::new((20, 20), Pulsar));
     // grid.insert(Layout::new((20, 20), Pentadecathlon));
-    grid.insert(Layout::new((20, 20), LightweightSpaceship::Top));
+    // grid.insert(Layout::new((20, 20), LightweightSpaceship::Top));
+    grid.insert(Layout::new((20, 20), Tub));
 
 
     // println!("{:?}", grid);

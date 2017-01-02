@@ -177,6 +177,76 @@ fn dec(x: usize, n: usize) -> usize {
 // Patterns
 ///////////////////////////////////////////////////////////////////////////////
 
+impl Pattern<Matrix> for Block {
+    fn size(&self) -> (usize, usize) {
+        (2, 2)
+    }
+
+    fn pattern(&self) -> Matrix {
+        arr2(&[
+            [Cell::Alive, Cell::Alive],
+            [Cell::Alive, Cell::Alive],
+        ])
+    }
+}
+
+
+impl Pattern<Matrix> for Beehive {
+    fn size(&self) -> (usize, usize) {
+        (3, 4)
+    }
+
+    fn pattern(&self) -> Matrix {
+        arr2(&[
+            [Cell::Unborn, Cell::Alive , Cell::Alive , Cell::Unborn],
+            [Cell::Alive , Cell::Unborn, Cell::Unborn, Cell::Alive ],
+            [Cell::Unborn, Cell::Alive , Cell::Alive , Cell::Unborn],
+        ])
+    }
+}
+
+impl Pattern<Matrix> for Loaf {
+    fn size(&self) -> (usize, usize) {
+        (4, 4)
+    }
+
+    fn pattern(&self) -> Matrix {
+        arr2(&[
+            [Cell::Unborn, Cell::Alive , Cell::Alive , Cell::Unborn],
+            [Cell::Alive , Cell::Unborn, Cell::Unborn, Cell::Alive ],
+            [Cell::Unborn, Cell::Alive , Cell::Unborn, Cell::Alive ],
+            [Cell::Unborn, Cell::Unborn, Cell::Alive , Cell::Unborn],
+        ])
+    }
+}
+
+impl Pattern<Matrix> for Boat {
+    fn size(&self) -> (usize, usize) {
+        (3, 3)
+    }
+
+    fn pattern(&self) -> Matrix {
+        arr2(&[
+            [Cell::Alive , Cell::Alive , Cell::Unborn],
+            [Cell::Alive , Cell::Unborn, Cell::Alive ],
+            [Cell::Unborn, Cell::Alive , Cell::Unborn],
+        ])
+    }
+}
+
+impl Pattern<Matrix> for Tub {
+    fn size(&self) -> (usize, usize) {
+        (3, 3)
+    }
+
+    fn pattern(&self) -> Matrix {
+        arr2(&[
+            [Cell::Unborn, Cell::Alive , Cell::Unborn],
+            [Cell::Alive , Cell::Unborn, Cell::Alive ],
+            [Cell::Unborn, Cell::Alive , Cell::Unborn],
+        ])
+    }
+}
 
 impl Pattern<Matrix> for Blinker {
     fn size(&self) -> (usize, usize) {

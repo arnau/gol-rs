@@ -41,19 +41,37 @@ impl<T: Pattern<Matrix>> Layout<T> {
 }
 
 
+// Custom
+
+
 #[derive(Debug, Clone)]
 pub struct Random(pub usize, pub usize);
 
-#[derive(Debug, Clone)]
-pub struct Blinker;
+
+// Still lifes
+
 
 #[derive(Debug, Clone)]
-pub enum LightweightSpaceship {
-    Right,
-    Left,
-    Top,
-    Bottom,
-}
+pub struct Block;
+
+#[derive(Debug, Clone)]
+pub struct Beehive;
+
+#[derive(Debug, Clone)]
+pub struct Loaf;
+
+#[derive(Debug, Clone)]
+pub struct Boat;
+
+#[derive(Debug, Clone)]
+pub struct Tub;
+
+
+// Oscillators
+
+
+#[derive(Debug, Clone)]
+pub struct Blinker;
 
 #[derive(Debug, Clone)]
 pub struct Toad;
@@ -67,6 +85,17 @@ pub struct Pulsar;
 #[derive(Debug, Clone)]
 pub struct Pentadecathlon;
 
+
+// Spaceships
+
+
+#[derive(Debug, Clone)]
+pub enum LightweightSpaceship {
+    Right,
+    Left,
+    Top,
+    Bottom,
+}
 
 #[derive(Debug, Clone)]
 pub enum Glider {
