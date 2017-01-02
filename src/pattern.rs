@@ -48,6 +48,14 @@ pub struct Random(pub usize, pub usize);
 pub struct Blinker;
 
 #[derive(Debug, Clone)]
+pub enum LightweightSpaceship {
+    Right,
+    Left,
+    Top,
+    Bottom,
+}
+
+#[derive(Debug, Clone)]
 pub struct Toad;
 
 #[derive(Debug, Clone)]

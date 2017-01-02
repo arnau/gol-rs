@@ -319,6 +319,38 @@ impl Pattern<Matrix> for Pentadecathlon {
 }
 
 
+impl Pattern<Matrix> for LightweightSpaceship {
+    fn size(&self) -> (usize, usize) {
+        (5, 5)
+    }
+
+    fn pattern(&self) -> Matrix {
+        let (n, m) = self.size();
+        let raw: Vec<Cell> = [
+            0, 1, 1, 1, 1,
+            1, 0, 0, 0, 1,
+            0, 0, 0, 0, 1,
+            1, 0, 0, 1, 0,
+            0, 0, 0, 0, 0,
+        ].into_iter().map(|&x| x.into()).collect();
+        let mut canvas = Array::from_shape_vec((n as Ix, m as Ix), raw).unwrap();
+
+        match *self {
+            LightweightSpaceship::Right => canvas,
+            LightweightSpaceship::Left => {
+                &canvas.invert_axis(Axis(1));
+                canvas
+            }
+            LightweightSpaceship::Top => {
+                &canvas.invert_axis(Axis(1));
+                canvas.reversed_axes()
+            }
+            LightweightSpaceship::Bottom => canvas.reversed_axes(),
+        }
+    }
+}
+
+
 impl Pattern<Matrix> for Random {
     fn size(&self) -> (usize, usize) {
         (self.0, self.1)
